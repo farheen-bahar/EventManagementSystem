@@ -3,14 +3,16 @@ import React, { Component } from 'react'
 class Login extends Component{
     constructor(){
         super()
-        
+        this.onForgotPwdClick = this.onForgotPwdClick.bind(this)
+    }
+    onForgotPwdClick(value){
+        this.props.onForgotPwdClick(value)
     }
     render(){
-        console.log(this.props)
         return (
             <form onSubmit={this.props.onFormSubmit}>
                     <label htmlFor="email"><b>Email</b></label>
-                    <input type="text" placeholder="Enter username" name="uname" required 
+                    <input type="text" placeholder="Enter email" name="uname" required 
                                        onChange={this.props.onEmailChange}
                                        />
 
@@ -19,7 +21,7 @@ class Login extends Component{
                            onChange={this.props.onPwdChange}/>
 
                     <button type="submit" className='btn-login'>Login</button>
-                    <p className='forgot-pwd'>Forgot password?</p>
+                    <p className='forgot-pwd' onClick={()=>this.onForgotPwdClick(true)}>Forgot password?</p>
             </form>
         )
     }

@@ -139,6 +139,9 @@ input[type="password"] {
   cursor: pointer;
   color: #007cb0;
 }
+.acc-recovery:hover {
+  cursor: default !important;
+}
 .form-body {
   padding: 0px 16px 16px 16px;
 }
