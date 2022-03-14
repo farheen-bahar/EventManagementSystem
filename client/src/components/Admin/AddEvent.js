@@ -30,7 +30,7 @@ class AddEvent extends Component{
                 <form>
                     <div className="col-75">
                         <label htmlFor="eventname"><b>Event name</b></label>
-                        <div><input type="text" placeholder="Enter event name" name="eventname" required/></div>
+                        <input type="text" placeholder="Enter event name" name="eventname" required/>
                     </div>
                     <div className="col-75">
                         <label htmlFor="city"><b>City</b></label>
@@ -48,8 +48,9 @@ class AddEvent extends Component{
                         <label htmlFor="desc"><b>Description</b></label>
                         <textarea name="desc" rows="4" cols="100" style={{resize:"none"}} maxLength={1000}></textarea>
                     </div>
-                    <div  style={{marginBottom: "10px"}}>
+                    <div  style={{marginBottom: "10px"}} className="col-75">
                         <label htmlFor="tags"><b>Tags</b></label>
+                        <input type="text" placeholder="Enter tags" name="tags" required/>
                         <div className="event-tag">
                             {this.state.tags.map(tag=>{
                                 return <p>{tag} <span>&times;</span></p>
