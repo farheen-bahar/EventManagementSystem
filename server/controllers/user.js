@@ -27,7 +27,7 @@ const signup = async (req, res, next) => {
       password: req.body.password,
     });
     user = await user.save();
-    res.json({ user });
+    res.status(200).json({ user });
   } catch (err) {
     next(err);
   }
