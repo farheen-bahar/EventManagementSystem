@@ -16,8 +16,6 @@ router.post(
       min: 3,
     }),
     check("lname", "Last Name should be a string").isString(),
-    check("role", "Role is required").notEmpty(),
-    check("role", "Role should be a Boolean value").isBoolean(),
     check("email", "Email is required").notEmpty(),
     check("email", "Invalid Email").isEmail(),
     check("password", "Password is required").notEmpty(),
