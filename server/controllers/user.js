@@ -12,7 +12,9 @@ const signup = async (req, res, next) => {
         data: err.array(),
       };
     }
-    const checkUser = await User.findOne({ email: req.body.email });
+    const checkUser = await User.findOne({
+      email: req.body.email.toUpperCase(),
+    });
     if (checkUser) {
       // throw {
       //   ...errors[409],
@@ -27,7 +29,7 @@ const signup = async (req, res, next) => {
         fname: req.body.fname,
         lname: req.body.lname,
         role: req.body.role,
-        email: req.body.email,
+        email: req.body.email.toUpperCase(),
         password: req.body.password,
       });
       user = await user.save();
