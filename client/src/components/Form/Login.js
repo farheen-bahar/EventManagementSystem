@@ -12,7 +12,7 @@ class Login extends Component{
         return (
             <form onSubmit={this.props.onFormSubmit}>
                     <label htmlFor="email"><b>Email</b></label>
-                    <input type="text" placeholder="Enter email" name="uname" required 
+                    <input type="text" placeholder="Enter email" name="email" required 
                                        onChange={this.props.onEmailChange}
                                        />
 
