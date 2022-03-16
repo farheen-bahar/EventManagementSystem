@@ -14,20 +14,25 @@ const signup = async (req, res, next) => {
     }
     const checkUser = await User.findOne({ email: req.body.email });
     if (checkUser) {
-      throw {
+      // throw {
+      //   ...errors[409],
+      //   data: `User with email : ${req.body.email} already exists`,
+      // };
+      res.status(409).json({
         ...errors[409],
         data: `User with email : ${req.body.email} already exists`,
-      };
+      });
+    } else {
+      let user = new User({
+        fname: req.body.fname,
+        lname: req.body.lname,
+        role: req.body.role,
+        email: req.body.email,
+        password: req.body.password,
+      });
+      user = await user.save();
+      res.status(200).json({ user });
     }
-    let user = new User({
-      fname: req.body.fname,
-      lname: req.body.lname,
-      role: req.body.role,
-      email: req.body.email,
-      password: req.body.password,
-    });
-    user = await user.save();
-    res.status(200).json({ user });
   } catch (err) {
     next(err);
   }
