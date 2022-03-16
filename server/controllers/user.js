@@ -16,25 +16,21 @@ const signup = async (req, res, next) => {
       email: req.body.email.toUpperCase(),
     });
     if (checkUser) {
-      // throw {
-      //   ...errors[409],
-      //   data: `User with email : ${req.body.email} already exists`,
-      // };
-      res.status(409).json({
+      throw {
         ...errors[409],
         data: `User with email : ${req.body.email} already exists`,
-      });
-    } else {
-      let user = new User({
-        fname: req.body.fname,
-        lname: req.body.lname,
-        role: req.body.role,
-        email: req.body.email.toUpperCase(),
-        password: req.body.password,
-      });
-      user = await user.save();
-      res.status(200).json({ user });
+      };
     }
+    let user = new User({
+      fname: req.body.fname,
+      lname: req.body.lname,
+      role: req.body.role,
+      email: req.body.email.toUpperCase(),
+      password: req.body.password,
+    });
+    console.log(req.body.email.toUpperCase());
+    user = await user.save();
+    res.status(200).json({ user });
   } catch (err) {
     next(err);
   }

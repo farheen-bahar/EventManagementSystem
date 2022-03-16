@@ -311,7 +311,6 @@ class Form extends Component {
         //Failure: Oops! Something went wrong. Please try again.
 
         //TODO: Assuming success
-        console.log("Registration");
         var data = JSON.stringify({
           fname: firstname,
           lname: lastname,
@@ -329,13 +328,6 @@ class Form extends Component {
               //Success:
               notifications.push(NOTIFICATIONS.SIGNUP_SUCCESS);
               this.setState({ ...this.state, notifications, isLogin: true });
-            } else if (res.status === 409) {
-              //Failure
-              errorMessages.push(ERRORS.USER_ALREADY_EXISTS);
-              this.setState({
-                ...this.state,
-                errorMessages,
-              });
             } else {
               //Failure
               errorMessages.push(ERRORS.USER_REGISTRATION_FAILED);
@@ -347,13 +339,11 @@ class Form extends Component {
           })
           .catch((err) => {
             //Error
-            console.log(err);
-            errorMessages.push(ERRORS.GENERIC_FAILED);
+            errorMessages.push(ERRORS.USER_ALREADY_EXISTS);
             this.setState({
               ...this.state,
               errorMessages,
             });
-            //   }
           });
       } else {
         this.setState({ ...this.state, errorMessages });
