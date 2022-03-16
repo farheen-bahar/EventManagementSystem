@@ -11,6 +11,8 @@ const {
 } = require("./middleware/http-error-handlers");
 const authRoute = require("./routes/auth");
 const otproutes = require("./routes/OTP");
+const userloginroutes = require('./routes/User')
+
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -21,8 +23,10 @@ app.use(bodyParser.json({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
+app.use('/user',userloginroutes)
 app.use("/api/v1/auth", authRoute);
 app.use("/api", otproutes);
+
 app.get("/", function (req, res) {
   console.log("route / is accessed.");
   res.send("Hi");
