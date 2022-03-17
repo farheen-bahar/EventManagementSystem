@@ -38,4 +38,8 @@ router.post(
   userCtrl.signup
 );
 
+router.post('/login', [
+  check("email", "Email is required").notEmpty(),
+  check("password", "Password is required").notEmpty()], userCtrl.login);
+
 module.exports = router;
