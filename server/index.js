@@ -10,6 +10,7 @@ const {
   genericErrorHandler,
 } = require("./middleware/http-error-handlers");
 const authRoute = require("./routes/auth");
+const userRoute = require("./routes/user");
 const otproutes = require("./routes/OTP");
 
 const app = express();
@@ -22,6 +23,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
 app.use("/api/v1/auth", authRoute);
+app.use("/api/v1/user", userRoute);
 app.use("/api", otproutes);
 
 app.get("/", function (req, res) {
