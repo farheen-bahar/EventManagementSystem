@@ -51,9 +51,13 @@ class AddEvent extends Component{
     }
     onTagAdd(){
         let {tags} = this.state
-        tags= tags.concat(this.tagref.current.value)
-        this.setState({...this.state, tags})
-        this.tagref.current.value=""
+        let tagvalue= this.tagref.current.value
+        if(tagvalue.trim().length>0)
+        {
+            tags= tags.concat(tagvalue)
+            this.setState({...this.state, tags})
+            this.tagref.current.value=""
+        }
     }
     onTagDelete(deleteIndex){
         let {tags} = this.state
@@ -296,10 +300,12 @@ class AddEvent extends Component{
                                             required
                                             onBlur={(event)=>this.onSlotChange(event, index,SLOT_PROPS.END)}></input></td>
                                     <td><input type="number" name="vip" 
+                                            className="number-input"
                                             defaultValue={slot.viptickets} 
                                             min={0} 
                                             onBlur={(event)=>this.onSlotChange(event, index,SLOT_PROPS.VIP)}required></input></td>
-                                    <td><input type="number" name="ga" 
+                                    <td><input type="number" name="ga"
+                                            className="number-input" 
                                             defaultValue={slot.gatickets} 
                                             min={0} 
                                             onBlur={(event)=>this.onSlotChange(event, index,SLOT_PROPS.GA)}required></input></td>
@@ -317,19 +323,26 @@ class AddEvent extends Component{
                         </table>
 
                         <label><b>Maximum numbers of bookings allowed per person:</b></label>
-                        <input type="number" name="maxtickets" min={0} defaultValue={maxTickets}
+                        <input type="number" name="maxtickets" 
+                            min={0} defaultValue={maxTickets} 
+                            className="number-input"
                             onBlur={(event)=>this.setState({...this.state, maxTickets:event.target.value})}></input>
                         <div>
                             <label><b>Price</b></label>
                             <span>(INR) </span>
                         </div>
                         <span>VIP: </span>
-                        <input type="number" name="vipprice" step=".01" 
-                            defaultValue={vipprice}
-                            onBlur={(event)=>this.setState({...this.state, vipprice:event.target.value})}></input>
+                        <input type="number" name="vipprice" 
+                               step=".01"  
+                               className="number-input"
+                               defaultValue={vipprice}
+                               onBlur={(event)=>this.setState({...this.state, vipprice:event.target.value})}></input>
                         <span>GA: </span>
-                        <input type="number" name="gaprice" step=".01" defaultValue={gaprice}
-                            onBlur={(event)=>this.setState({...this.state, gaprice:event.target.value})}></input>
+                        <input type="number" name="gaprice" 
+                               step=".01" 
+                               className="number-input"
+                               defaultValue={gaprice}
+                               onBlur={(event)=>this.setState({...this.state, gaprice:event.target.value})}></input>
 
                         <div className="btn-group">
                             <button type="submit" className='btn-login'>Save</button>

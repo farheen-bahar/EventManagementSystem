@@ -250,7 +250,7 @@ class Form extends Component{
                 //API-validate user info
                 //Success: Navigate to home page
                 //Assuming success:
-                let loggedinuser = {id:'245678ghjk',firstname:'Anuja Reddy', lastname:'Parupally', email:'abc@gmail.com', role: 0 }
+                let loggedinuser = {id:'245678ghjk',firstname:'Anuja Reddy', lastname:'Parupally', email:'subp875@gmail.com', role: 0 }
                 this.setState({...this.state, user: loggedinuser})
                 let {setUser} = this.context
                 let token = ''
@@ -357,7 +357,7 @@ class Form extends Component{
         var {errorMessages, notifications, user, isLogin, isForgotPwd, otp, isUserVerified} = this.state
         return (
             <div>
-                {user && (<Navigate to="/home" replace={true}/>)}
+                {user && (<Navigate to="/events" replace={true}/>)}
                  
                 {errorMessages.length ? this.displayNotification(true) :""}
                 {notifications.length ? this.displayNotification(false) :""}   
