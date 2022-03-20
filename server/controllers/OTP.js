@@ -41,7 +41,7 @@ const getotp = async (req, res) => {
       res.status(200).json({email, expireat})
     }
     else{
-      res.status(500).json({error: error.message, message: RESPONSE_MSGS.OTP_FAILED})
+      res.status(200).json({error: error.message, message: RESPONSE_MSGS.OTP_FAILED})
     }
   } catch (error) {
     res.status(500).json({error: error.message, message: RESPONSE_MSGS.ERROR_500})
@@ -63,7 +63,7 @@ const verifyotp = async (req,res) => {
       if(existingEmail.otpvalue === +otp && existingEmail.expireat >= new Date())
       res.status(200).send(true)
       else
-      res.status(500).json(RESPONSE_MSGS.INVALID_USER)
+      res.status(200).send(false)
     }
     else{
       res.status(404).json(RESPONSE_MSGS.EMAIL_NOT_FOUND)

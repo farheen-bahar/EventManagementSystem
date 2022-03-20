@@ -1,10 +1,11 @@
-import React, { Component } from "react";
-import { Navigate } from "react-router";
-import Login from "./Login";
-import SignUp from "./SignUp";
-import Notification from "../Notifications/Notification";
-import ForgotPwd from "./ForgotPwd";
-import axios from "axios";
+import React, { Component } from 'react'
+import {Navigate} from 'react-router'
+import Login from './Login'
+import SignUp from './SignUp'
+import Notification from '../Notifications/Notification'
+import ForgotPwd from './ForgotPwd'
+import axios from 'axios'
+import {  SessionConsumer, SessionContext } from '../SessionCookie/SessionCookie'
 
 const ERRORS = {
   EMAIL: "Invalid Email ID.",
@@ -90,34 +91,66 @@ class Form extends Component {
         errorMessages: [],
       });
     }
-  }
-  onPwdChange(event) {
-    var pwd = event.target.value;
-    var pattern = new RegExp(
-      /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-_]).{6,12}$/
-    );
-    // ^ represents the starting of the string.
-    // (?=.*[a-z]) represent at least one lowercase character.
-    // (?=.*[A-Z]) represents at least one uppercase character.
-    // (?=.*\\d) represents at least one numeric value.
-    // (?=.*[-+_!@#$%^&*., ?]) represents at least one special character.
-    // . represents any character except line break.
-    // + represents one or more times.
-    if (!this.state.isLogin) {
-      //test for password length & matching pattern only in case of registration
-      if (pwd.length >= 6 && pwd.length <= 12) {
-        if (!pattern.test(pwd)) {
-          console.log("Failed pattern");
-          this.setState({
-            ...this.state,
-            password: { value: "", isValid: false },
-          });
-        } else {
-          console.log("Success");
-          this.setState({
-            ...this.state,
-            password: { value: pwd, isValid: true },
-          });
+    static contextType = SessionContext
+
+    validateEmail(value){
+        var pattern = new RegExp(/^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i);
+        var email=value
+        return (pattern.test(email)) ? true : false
+    }
+    onEmailChange(event){
+        let email=event.target.value
+        let isValidEmail = this.validateEmail(email)
+        if (!isValidEmail) {
+            console.log('Failed')
+            this.setState({...this.state,email:{value:"",isValid:false,},errorMessages:[]})
+        }
+        else{
+            console.log('Success')
+            this.setState({...this.state,email:{value:email,isValid:true,},errorMessages:[]})
+        }
+    }
+    onPwdChange(event){
+        var pwd=event.target.value
+        var pattern = new RegExp(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,12}$/);
+        // ^ represents the starting of the string.
+        // (?=.*[a-z]) represent at least one lowercase character.
+        // (?=.*[A-Z]) represents at least one uppercase character.
+        // (?=.*\\d) represents at least one numeric value.
+        // (?=.*[-+_!@#$%^&*., ?]) represents at least one special character.
+        // . represents any character except line break.
+        // + represents one or more times.
+        if(!this.state.isLogin){
+            //test for password length & matching pattern only in case of registration
+            if(pwd.length >= 6 && pwd.length <=12){
+                if (!pattern.test(pwd)) {
+                    console.log('Failed pattern')
+                    this.setState({...this.state,password:{value:"",isValid:false,}})
+                }
+                else{
+                    console.log('Success')
+                    this.setState({...this.state,password:{value:pwd,isValid:true,}})
+                }
+            }
+            else{
+                console.log('Failed length')
+                this.setState({...this.state,password:{value:"",isValid:false,}})
+            }
+        }
+        else{
+            //accept user input without any validation for login since we verify it from DB
+            this.setState({...this.state,password:{value:pwd,isValid:true,}})
+        }
+    }
+    onConfirmPwd(event){
+        var confirmPwd= event.target.value
+        var pwd = this.state.password
+        if(pwd.isValid && confirmPwd === pwd.value)
+        {
+            this.setState({...this.state, password:{...this.state.password, isConfirm: true}, errorMessages:[]})
+        }
+        else{
+            this.setState({...this.state, password:{...this.state.password, isConfirm: false, errorMessages:[]}})
         }
       } else {
         console.log("Failed length");
@@ -188,127 +221,107 @@ class Form extends Component {
                              
                     Failure: Display 'Invalid email ID' notification
                 */
-      //Assuming success:
-      axios
-        .get(`/api/otp/${email.value}`)
-        .then((res) => {
-          console.log(res);
-          if (res.status === 200) {
-            notifications.push(NOTIFICATIONS.OTP_SENT);
-            this.setState({
-              ...this.state,
-              notifications,
-              otp: { ...otp, display: true, expiresat: res.data.expireat },
-            });
-          } else {
-            errorMessages.push(ERRORS.EMAIL);
-            this.setState({
-              ...this.state,
-              otp: { ...this.state.otp, display: false },
-            });
-          }
-        })
-        .catch((err) => {
-          errorMessages.push(ERRORS.GENERIC_FAILED);
-          this.setState({ ...this.state, errorMessages });
-        });
-    } else {
-      this.setState({ ...this.state, errorMessages });
+                //Assuming success:
+                axios.get(`/api/otp/${email.value}`).then(res=>{
+                    console.log(res)
+                    if(res.status===200){
+                        notifications.push(NOTIFICATIONS.OTP_SENT)
+                        this.setState({...this.state, notifications, errorMessages:[], otp:{...otp, display: true, expiresat: res.data.expireat}})
+                    }
+                    else{
+                        errorMessages.push(ERRORS.EMAIL)
+                        this.setState({...this.state, errorMessages, notifications:[], otp:{...this.state.otp, display: false}})
+                    }
+                }).catch(err=>{
+                    errorMessages.push(ERRORS.GENERIC_FAILED)
+                    this.setState({...this.state,errorMessages, notifications:[]})
+                })
+                
+            }
+            else{
+                this.setState({...this.state,errorMessages, notifications:[]})
+            }
     }
-  }
-  onVerifyOTPSubmit() {
-    let { otp, email } = this.state;
-    let now = new Date();
-    var errorMessages = [];
-
-    if (otp.value.trim().length === 0) {
-      //OTP is required
-      errorMessages.push(ERRORS.OTP_REQUIRED);
-      this.setState({ ...this.state, errorMessages, isUserVerified: false });
-    }
-    //check if OTP is expired
-    else if (now < new Date(otp.expiresat)) {
-      /*
+    onVerifyOTPSubmit(){
+        let {otp,email} = this.state
+        let now = new Date()
+        var errorMessages=[]
+        
+        if(otp.value.trim().length === 0)
+        {
+            //OTP is required
+            errorMessages.push(ERRORS.OTP_REQUIRED)
+            this.setState({...this.state, errorMessages, notifications:[], isUserVerified:false})
+        }
+        //check if OTP is expired
+        else if(now < new Date(otp.expiresat))
+        {
+            /*
                 API: send otp, email to validte
                 Success: User is verifed.
                          Display password and confirm password fields to allow user to set new passsword
                 Failure: display  "User verification Failed" notification 
                 Error: display "Oops! Something went wrong. Please try again." notification
-            */
-
-      var data = JSON.stringify({
-        email: email.value,
-        otp: otp.value,
-      });
-      axios
-        .post("/api/otp", data, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-        .then((res) => {
-          if (res.status === 200) {
-            //Success:
-            this.setState({ ...this.state, isUserVerified: true });
-          } else {
-            //Failure
-            errorMessages.push(ERRORS.USER_VERIFY_FAILED);
-            this.setState({
-              ...this.state,
-              errorMessages,
-              isUserVerified: false,
-            });
-          }
-        })
-        .catch((err) => {
-          //Error
-          errorMessages.push(ERRORS.GENERIC_FAILED);
-          this.setState({
-            ...this.state,
-            errorMessages,
-            isUserVerified: false,
+            */ 
+           
+          var data = JSON.stringify({
+            "email": email.value,
+            "otp": otp.value
           });
-        });
-    } else {
-      /* 
+           axios.post('/api/otp',data, {
+               headers: {
+                'Content-Type': 'application/json'
+               }
+            }).then(res=>{
+                if(res.status===200 && res.data){
+                    //Success with data true or false to indicate user verification
+                    this.setState({...this.state, isUserVerified: true, notifications:[], errorMessages: []})
+                }
+                else{
+                    //Failure
+                    errorMessages.push(ERRORS.USER_VERIFY_FAILED)
+                    this.setState({...this.state, errorMessages, notifications:[], isUserVerified:false})
+                }
+           }).catch(err=>{
+                //Error
+                console.log(err)
+                errorMessages.push(ERRORS.GENERIC_FAILED)
+                this.setState({...this.state, errorMessages, notifications:[], isUserVerified:false})
+           })
+        }
+        else{
+            /* 
                 OTP Expired - display error notification
             */
-      errorMessages.push(ERRORS.OTP_EXPIRED);
-      this.setState({ ...this.state, errorMessages });
+           errorMessages.push(ERRORS.OTP_EXPIRED)
+           this.setState({...this.state, errorMessages, notifications:[]})
+        }
     }
-  }
-  onOTPChange(event) {
-    this.setState({
-      ...this.state,
-      otp: { ...this.state.otp, value: event.target.value },
-    });
-  }
-  onFormSubmit(event) {
-    event.preventDefault();
-    var { firstname, lastname, email, password } = this.state;
-    var errorMessages = [];
-    var notifications = [];
-    if (!email.isValid) errorMessages.push(ERRORS.EMAIL);
-    if (!password.isValid) errorMessages.push(ERRORS.PASSWORD);
-    if (this.state.isLogin) {
-      //LOGIN
-      if (errorMessages.length === 0) {
-        //API-validate user info
-        //Success: Navigate to home page
-        //Assuming success:
-        this.setState({ ...this.state, user: { name: "Anuja" } });
-        //Failure: Display 'Authentication failed!' notification
-      } else {
-        this.setState({ ...this.state, errorMessages });
-      }
-    } else {
-      //REGISTER
-      if (!password.isConfirm) errorMessages.push(ERRORS.CONFIRM_PASSWORD);
-      if (errorMessages.length === 0) {
-        //API- save user info
-        //Success: Display notification 'Successfully Registered!'
-        //         Make login tab active for the user to login
-        //Failure: Oops! Something went wrong. Please try again.
+    onOTPChange(event){
+        this.setState({...this.state, otp:{...this.state.otp, value: event.target.value}})
+    }
+    onFormSubmit(event){
+        event.preventDefault();
+        var {email, password}= this.state
+        var errorMessages=[]
+        var notifications=[]
+        if(!email.isValid)  errorMessages.push(ERRORS.EMAIL)
+        if(!password.isValid) errorMessages.push(ERRORS.PASSWORD)
+        if(this.state.isLogin)
+        {
+            //LOGIN
+            if(errorMessages.length === 0){
+                //API-validate user info
+                //Success: Navigate to home page
+                //Assuming success:
+                let loggedinuser = {id:'245678ghjk',firstname:'Anuja Reddy', lastname:'Parupally', email:'subp875@gmail.com', role: 0 }
+                this.setState({...this.state, user: loggedinuser})
+                let {setUser} = this.context
+                let token = ''
+                setUser(loggedinuser, token)
+               
+                //Failure: Display 'Authentication failed!' notification
+                
 
         //TODO: Assuming success
         var data = JSON.stringify({
@@ -336,178 +349,146 @@ class Form extends Component {
                 errorMessages,
               });
             }
-          })
-          .catch((err) => {
-            //Error
-            errorMessages.push(ERRORS.USER_ALREADY_EXISTS);
-            this.setState({
-              ...this.state,
-              errorMessages,
-            });
-          });
-      } else {
-        this.setState({ ...this.state, errorMessages });
-      }
+            else{
+                this.setState({...this.state,errorMessages})
+            }
+        }
+        else{
+            //REGISTER
+            if(!password.isConfirm) errorMessages.push(ERRORS.CONFIRM_PASSWORD)
+            if(errorMessages.length === 0)
+            {
+                //API- save user info
+                //Success: Display notification 'Successfully Registered!' 
+                //         Make login tab active for the user to login
+                //Failure: Oops! Something went wrong. Please try again. 
+
+                //TODO: Assuming success
+                notifications.push(NOTIFICATIONS.SIGNUP_SUCCESS)
+                this.setState({...this.state,notifications, isLogin: true, errorMessages:[]})
+            }
+            else{
+                this.setState({...this.state,errorMessages, notifications:[]})
+            }
+        }
     }
-  }
-  onCloseNotification(id, isError) {
-    var { errorMessages, notifications } = this.state;
-    if (isError) {
-      errorMessages = errorMessages.filter((err, index) => index !== id);
-      this.setState({ ...this.state, errorMessages });
-    } else {
-      notifications = notifications.filter(
-        (notification, index) => index !== id
-      );
-      this.setState({ ...this.state, notifications });
+    onCloseNotification(id, isError){
+        var {errorMessages, notifications} = this.state
+        if(isError){
+            errorMessages =errorMessages.filter((err,index)=> index!==id)
+            this.setState({...this.state, errorMessages})
+        }
+        else{
+            notifications = notifications.filter((notification,index)=> index!==id)
+            this.setState({...this.state, notifications})
+        }
     }
-  }
-  onForgotPwdClick(value) {
-    this.setState({
-      isLogin: false,
-      isForgotPwd: value,
-      firstname: "",
-      lastname: "",
-      email: { value: "", isValid: false },
-      password: { value: "", isValid: false },
-      user: null,
-    });
-  }
-  onForgotPwdSubmit(event) {
-    event.preventDefault();
-    var { email, password } = this.state;
-    var errorMessages = [],
-      notifications = [];
-    if (!password.isValid) errorMessages.push(ERRORS.PASSWORD);
-    if (!password.isConfirm) errorMessages.push(ERRORS.CONFIRM_PASSWORD);
-    if (errorMessages.length === 0) {
-      /**
-       * API: Send email and password to Users schema
-       *      update password for the record with this email
-       *      SUCCESS: API will send status 200
-       *               display 'Password updated successfully!'
-       *      FAILURE/ERROR: display "Oops! Something went wrong. Please try again."
-       */
-      try {
-        //TODO: call API and update password
-        //Assuming Success - switch to login tab
-        notifications.push(NOTIFICATIONS.PWD_RESET_SUCCESS);
-        this.setState({
-          ...this.state,
-          notifications,
-          isLogin: true,
-          isForgotPwd: false,
-        });
-      } catch {
-        errorMessages.push(ERRORS.GENERIC_FAILED);
-        this.setState({ ...this.state, errorMessages });
-      }
-    } else {
-      this.setState({ ...this.state, errorMessages });
+    onForgotPwdClick(value){
+        this.setState({isLogin:false, isForgotPwd:value, firstname:'', lastname:'',email:{value:'',isValid:false}, password:{value:'',isValid:false}, user:null})
     }
-  }
-  componentDidMount() {
-    //If the user already logged in (user name is available) - redirect to home
-    //Stay in login page if the user is not authenticated (user name is not available)
-  }
-  displayNotification(isError) {
-    let { errorMessages, notifications } = this.state;
-    var obj = isError ? errorMessages : notifications;
-    return (
-      <div className="notifications">
-        {obj.map((item, index) => {
-          return (
-            <Notification
-              key={index}
-              isError={isError}
-              id={index}
-              message={item}
-              onClose={this.onCloseNotification}
-            />
-          );
-        })}
-      </div>
-    );
-  }
-  render() {
-    var {
-      errorMessages,
-      notifications,
-      user,
-      isLogin,
-      isForgotPwd,
-      otp,
-      isUserVerified,
-    } = this.state;
-    return (
-      <div>
-        {user && <Navigate to="/home" replace={true} />}
-        {errorMessages.length && this.displayNotification(true)}
-        {notifications.length && this.displayNotification(false)}
-        {/* <div className='notifications'>      
-                    {errorMessages.map((error,index)=>{
-                       return  <Notification key={index} 
-                                             isError={true}
-                                             id={index}
-                                             message={error}
-                                             onClose={this.onCloseNotification}/>
+    onForgotPwdSubmit(event){
+        event.preventDefault()
+        var {email,password} = this.state
+        var errorMessages=[], notifications=[]
+        if(!password.isValid) errorMessages.push(ERRORS.PASSWORD)
+        if(!password.isConfirm) errorMessages.push(ERRORS.CONFIRM_PASSWORD)
+        if(errorMessages.length === 0){
+            /**
+             * API: Send email and password to Users schema
+             *      update password for the record with this email
+             *      SUCCESS: API will send status 200 
+             *               display 'Password updated successfully!'
+             *      FAILURE/ERROR: display "Oops! Something went wrong. Please try again."
+             */
+            try{
+                //TODO: call API and update password
+                //Assuming Success - switch to login tab
+                notifications.push(NOTIFICATIONS.PWD_RESET_SUCCESS)
+                this.setState({...this.state, notifications, isLogin: true, isForgotPwd: false, errorMessages:[]})
+            }
+            catch{
+                errorMessages.push(ERRORS.GENERIC_FAILED)
+                this.setState({...this.state,errorMessages, notifications:[]})
+            }
+        }
+        else{
+            this.setState({...this.state,errorMessages})
+        }
+
+    }
+    displayNotification(isError){
+        let {errorMessages, notifications}= this.state
+        var obj = isError ? errorMessages : notifications
+        return ( 
+                <div className='notifications'>      
+                    {obj.map((item,index)=>{
+                    return  <Notification key={index} 
+                                            isError={isError}
+                                            id={index}
+                                            message={item}
+                                            onClose={this.onCloseNotification}/>
                     })}
-                </div> :''       
-                } */}
-        <div className="form">
-          <div className="form-header">
-            {isForgotPwd ? (
-              <label className="tab-active acc-recovery">
-                ACCOUNT RECOVERY
-              </label>
-            ) : (
-              <>
-                <label
-                  className={isLogin ? "tab-active" : ""}
-                  onClick={() => this.onTabClick(true)}
-                >
-                  LOGIN
-                </label>
-                <label
-                  className={!isLogin ? "tab-active" : ""}
-                  onClick={() => this.onTabClick(false)}
-                >
-                  REGISTER
-                </label>
-              </>
-            )}
-          </div>
-          <div className="form-body">
-            {isForgotPwd ? (
-              <ForgotPwd
-                onForgotPwdSubmit={this.onForgotPwdSubmit}
-                onEmailChange={this.onEmailChange}
-                onOTPChange={this.onOTPChange}
-                onPwdChange={this.onPwdChange}
-                onConfirmPwd={this.onConfirmPwd}
-                onSendOTPSubmit={this.onSendOTPSubmit}
-                onVerifyOTPSubmit={this.onVerifyOTPSubmit}
-                displayOtp={otp.display}
-                isUserVerified={isUserVerified}
-              />
-            ) : isLogin ? (
-              <Login
-                onEmailChange={this.onEmailChange}
-                onPwdChange={this.onPwdChange}
-                onFormSubmit={this.onFormSubmit}
-                onForgotPwdClick={this.onForgotPwdClick}
-              />
-            ) : (
-              <SignUp
-                onEmailChange={this.onEmailChange}
-                onPwdChange={this.onPwdChange}
-                onFNChange={this.onFNChange}
-                onLNChange={this.onLNChange}
-                onConfirmPwd={this.onConfirmPwd}
-                onFormSubmit={this.onFormSubmit}
-              />
-            )}
-          </div>
+                </div> 
+            )
+
+    }
+
+    componentDidMount(){
+        //If the user already logged in (user name or id  is available) - redirect to home
+        //Stay in login page if the user is not authenticated (user name is not available)
+        let user = this.context.getUser()
+        if(user && user.id)
+        this.setState({...this.state, user})
+    }
+
+    render(){
+        
+        var {errorMessages, notifications, user, isLogin, isForgotPwd, otp, isUserVerified} = this.state
+        return (
+            <div>
+                {user && (<Navigate to="/events" replace={true}/>)}
+                 
+                {errorMessages.length ? this.displayNotification(true) :""}
+                {notifications.length ? this.displayNotification(false) :""}   
+               
+                <div className="form">
+                   <div className='form-header'>
+                   {isForgotPwd 
+                    ?  <label className='tab-active acc-recovery'>ACCOUNT RECOVERY</label>
+                    : ( 
+                        <>
+                            <label className={isLogin ? 'tab-active':''} 
+                                onClick={()=>this.onTabClick(true)}>LOGIN</label>
+                            <label className={!isLogin ? 'tab-active':''}
+                                onClick={()=>this.onTabClick(false)} >REGISTER</label>
+                        </>
+                    )}
+                    </div>
+                    <div className='form-body'> 
+                    {isForgotPwd 
+                     ? <ForgotPwd onForgotPwdSubmit={this.onForgotPwdSubmit}
+                                  onEmailChange={this.onEmailChange} 
+                                  onOTPChange={this.onOTPChange}
+                                  onPwdChange={this.onPwdChange}
+                                  onConfirmPwd={this.onConfirmPwd}
+                                  onSendOTPSubmit={this.onSendOTPSubmit}
+                                  onVerifyOTPSubmit={this.onVerifyOTPSubmit}
+                                  displayOtp = {otp.display}
+                                  isUserVerified = {isUserVerified}/> 
+                     : (isLogin
+                            ?<Login onEmailChange={this.onEmailChange}
+                                    onPwdChange={this.onPwdChange}
+                                    onFormSubmit = {this.onFormSubmit}
+                                    onForgotPwdClick={this.onForgotPwdClick}/>
+                            :<SignUp onEmailChange={this.onEmailChange}
+                                     onPwdChange={this.onPwdChange}
+                                     onFNChange={this.onFNChange}
+                                     onLNChange={this.onLNChange}
+                                     onConfirmPwd={this.onConfirmPwd}
+                                     onFormSubmit = {this.onFormSubmit}/>)
+                     }
+                    </div>
+            </div>
         </div>
       </div>
     );

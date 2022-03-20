@@ -6,6 +6,7 @@ class ForgotPwd extends Component
         super()
     }
     render(){
+      console.log(this.props)
         const {displayOtp, isUserVerified} = this.props
         return(
             <form onSubmit={this.props.onForgotPwdSubmit}>
@@ -22,6 +23,7 @@ class ForgotPwd extends Component
                               <label htmlFor="otp"><b>OTP</b></label>
                               <input type="text" placeholder="Enter OTP" name="otp" 
                                   onChange={this.props.onOTPChange}/>
+                              <span className='resend-otp' onClick={this.props.onSendOTPSubmit}>Resend OTP</span>
                           </>
                         : '')
                       : (
@@ -30,7 +32,7 @@ class ForgotPwd extends Component
                           <input type="password" placeholder="Enter new password" name="newpsw" required 
                                 maxLength={12} 
                                 minLength={6}
-                                onChange={this.props.onPwdChange}/>
+                                onBlur={this.props.onPwdChange}/>
 
                           <label htmlFor="confirmnewpsw"><b>Confirm new password</b></label>
                           <input type="password" placeholder="Re-enter new password" name="confirmnewpsw" required 
